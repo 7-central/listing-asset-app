@@ -5,13 +5,13 @@ import { ListingInput, ListingAssets } from '@/lib/types';
 
 export default function Home() {
   const [formData, setFormData] = useState<ListingInput>({
-    productName: 'Personalised Photo Slate – Test',
-    whatIsIt: 'A personalised photo slate plaque with a high-quality sublimated print. The customer uploads a favourite photo and we print it onto a rectangular slate with a stand.',
-    whoIsItFor: 'Ideal as a gift for mums, dads, grandparents, partners and friends. Great for birthdays, anniversaries, Mother\'s Day, Father\'s Day and Christmas.',
-    variations: 'Available in two sizes (small and large) and with either a black or white stand. Customer chooses size and stand colour from the options.',
-    personalisation: 'Customer can add a name and a short message (up to 30 characters per line) beneath the photo. Two lines max. Letters, numbers and basic punctuation only.',
-    priceNotes: 'Target price around £20 for the small size and £25 for the large size. We want a price that feels like a thoughtful but affordable gift.',
-    postageNotes: 'Postage around £3.50 for the first item and £1.00 for each additional slate in the same order. UK shipping only.',
+    productName: '',
+    whatIsIt: '',
+    whoIsItFor: '',
+    variations: '',
+    personalisation: '',
+    priceNotes: '',
+    postageNotes: '',
   });
 
   const [loading, setLoading] = useState(false);

@@ -1,65 +1,233 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { ListingInput, ListingAssets } from '@/lib/types';
 
 export default function Home() {
+  const [formData, setFormData] = useState<ListingInput>({
+    productName: 'Personalised Photo Slate – Test',
+    whatIsIt: 'A personalised photo slate plaque with a high-quality sublimated print. The customer uploads a favourite photo and we print it onto a rectangular slate with a stand.',
+    whoIsItFor: 'Ideal as a gift for mums, dads, grandparents, partners and friends. Great for birthdays, anniversaries, Mother\'s Day, Father\'s Day and Christmas.',
+    variations: 'Available in two sizes (small and large) and with either a black or white stand. Customer chooses size and stand colour from the options.',
+    personalisation: 'Customer can add a name and a short message (up to 30 characters per line) beneath the photo. Two lines max. Letters, numbers and basic punctuation only.',
+    priceNotes: 'Target price around £20 for the small size and £25 for the large size. We want a price that feels like a thoughtful but affordable gift.',
+    postageNotes: 'Postage around £3.50 for the first item and £1.00 for each additional slate in the same order. UK shipping only.',
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [assets, setAssets] = useState<ListingAssets | null>(null);
+
+  const handleInputChange = (field: keyof ListingInput) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData(prev => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setAssets(null);
+
+    try {
+      const response = await fetch('/api/generate-listing', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (result.ok) {
+        setAssets(result.assets);
+      } else {
+        setError(result.error || 'An error occurred');
+      }
+    } catch {
+      setError('Network error: Unable to connect to the server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="mx-auto max-w-4xl px-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Listing Asset Generator</h1>
+        
+        <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 mb-8">
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-2">
+                Product Name *
+              </label>
+              <input
+                type="text"
+                id="productName"
+                required
+                value={formData.productName}
+                onChange={handleInputChange('productName')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="whatIsIt" className="block text-sm font-medium text-gray-700 mb-2">
+                What is this product? *
+              </label>
+              <textarea
+                id="whatIsIt"
+                required
+                rows={3}
+                value={formData.whatIsIt}
+                onChange={handleInputChange('whatIsIt')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Describe the product in plain language"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="whoIsItFor" className="block text-sm font-medium text-gray-700 mb-2">
+                Who is it for / what occasions? *
+              </label>
+              <textarea
+                id="whoIsItFor"
+                required
+                rows={3}
+                value={formData.whoIsItFor}
+                onChange={handleInputChange('whoIsItFor')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Target audience and use cases"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="variations" className="block text-sm font-medium text-gray-700 mb-2">
+                What variations are available? *
+              </label>
+              <textarea
+                id="variations"
+                required
+                rows={3}
+                value={formData.variations}
+                onChange={handleInputChange('variations')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., colour, size, material options"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="personalisation" className="block text-sm font-medium text-gray-700 mb-2">
+                Does it allow personalisation? If yes, what exactly can be personalised? *
+              </label>
+              <textarea
+                id="personalisation"
+                required
+                rows={3}
+                value={formData.personalisation}
+                onChange={handleInputChange('personalisation')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Personalisation options or 'None'"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="priceNotes" className="block text-sm font-medium text-gray-700 mb-2">
+                Price Notes (optional)
+              </label>
+              <textarea
+                id="priceNotes"
+                rows={2}
+                value={formData.priceNotes}
+                onChange={handleInputChange('priceNotes')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Any pricing information or notes"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="postageNotes" className="block text-sm font-medium text-gray-700 mb-2">
+                Postage Notes (optional)
+              </label>
+              <textarea
+                id="postageNotes"
+                rows={2}
+                value={formData.postageNotes}
+                onChange={handleInputChange('postageNotes')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Shipping or postage information"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+              {loading ? 'Generating...' : 'Generate Listing Assets'}
+            </button>
+          </div>
+        </form>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+            <div className="flex">
+              <div className="text-red-700">
+                <strong>Error:</strong> {error}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {assets && (
+          <div className="bg-white shadow rounded-lg p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Generated Listing Assets</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Title</h3>
+                <p className="bg-gray-50 p-3 rounded border">{assets.title}</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Description</h3>
+                <div className="bg-gray-50 p-3 rounded border whitespace-pre-wrap">{assets.description}</div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Key Features</h3>
+                <ul className="bg-gray-50 p-3 rounded border list-disc list-inside">
+                  {assets.keyFeatures.map((feature, index) => (
+                    <li key={index}>{feature}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Tags</h3>
+                <div className="bg-gray-50 p-3 rounded border">
+                  {assets.tags.join(', ')}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Personalisation (Short)</h3>
+                <p className="bg-gray-50 p-3 rounded border">{assets.personalisationShort}</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Personalisation (Long)</h3>
+                <div className="bg-gray-50 p-3 rounded border whitespace-pre-wrap">{assets.personalisationLong}</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

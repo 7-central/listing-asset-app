@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(cat:*)",
+      "Bash(npm run dev:*)",
+      "Bash(ls:*)",
+      "Bash(taskkill:*)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebSearch",
+      "WebFetch(domain:community.openai.com)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,4 +1,4 @@
-import { ListingInput, ListingAssets } from './types';
+import { ListingInput, ListingAssets, RoyalMailAdviceRequest, RoyalMailAdviceResponse } from './types';
 
 export async function generateListingAssets(input: ListingInput): Promise<ListingAssets> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -112,6 +112,115 @@ Focus on:
 - Clear, compelling key features
 - Relevant Etsy search tags
 - Professional personalisation guidance
+
+Respond with ONLY the JSON object, no other text or explanations.`;
+}
+
+export async function getRoyalMailAdvice(input: RoyalMailAdviceRequest): Promise<RoyalMailAdviceResponse> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY environment variable is not set');
+  }
+
+  const prompt = buildRoyalMailPrompt(input);
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1000,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Anthropic API error: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.content?.[0]?.text) {
+    throw new Error('No content returned from Anthropic API');
+  }
+
+  let content = data.content[0].text.trim();
+
+  // Strip markdown code blocks if present
+  if (content.startsWith('```')) {
+    content = content.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+  }
+
+  let parsedAdvice: unknown;
+  try {
+    parsedAdvice = JSON.parse(content);
+  } catch (error) {
+    throw new Error(`Failed to parse Anthropic response as JSON: ${error}`);
+  }
+
+  // Basic runtime validation
+  if (!parsedAdvice || typeof parsedAdvice !== 'object') {
+    throw new Error('Invalid response: expected object');
+  }
+
+  const advice = parsedAdvice as Record<string, unknown>;
+
+  if (!advice.serviceName || typeof advice.serviceName !== 'string') {
+    throw new Error('Invalid response: serviceName must be a string');
+  }
+  if (!advice.bracket || typeof advice.bracket !== 'string') {
+    throw new Error('Invalid response: bracket must be a string');
+  }
+  if (typeof advice.estimatedCostNet !== 'number') {
+    throw new Error('Invalid response: estimatedCostNet must be a number');
+  }
+  if (!advice.maxDimensionsMm || typeof advice.maxDimensionsMm !== 'object') {
+    throw new Error('Invalid response: maxDimensionsMm must be an object');
+  }
+
+  const maxDims = advice.maxDimensionsMm as Record<string, unknown>;
+  if (typeof maxDims.width !== 'number' || typeof maxDims.height !== 'number' || typeof maxDims.depth !== 'number') {
+    throw new Error('Invalid response: maxDimensionsMm must contain width, height, and depth as numbers');
+  }
+
+  return advice as RoyalMailAdviceResponse;
+}
+
+function buildRoyalMailPrompt(input: RoyalMailAdviceRequest): string {
+  return `You are a UK shipping expert. Based on the package specifications provided, recommend the most suitable Royal Mail service and pricing.
+
+Package specifications:
+- Weight: ${input.weightGrams}g
+- Dimensions: ${input.widthMm}mm (W) x ${input.heightMm}mm (H) x ${input.depthMm}mm (D)
+
+You must respond with ONLY valid JSON in this exact format:
+{
+  "serviceName": "Royal Mail service name (e.g., Royal Mail 2nd Class Small Parcel)",
+  "bracket": "Size/weight bracket name (e.g., Small Parcel 0-2kg)",
+  "estimatedCostNet": 3.50,
+  "maxDimensionsMm": {
+    "width": 610,
+    "height": 460,
+    "depth": 460
+  }
+}
+
+Choose the most cost-effective Royal Mail service that accommodates these dimensions and weight. Common options include:
+- Large Letter (max 353mm x 250mm x 25mm, up to 750g)
+- Small Parcel (max 610mm x 460mm x 460mm, up to 2kg)
+- Medium Parcel (max 610mm x 460mm x 460mm, 2-20kg)
+
+Provide realistic 2025 UK pricing (net, excluding VAT) based on typical Royal Mail rates. Be conservative and round up slightly.
 
 Respond with ONLY the JSON object, no other text or explanations.`;
 }

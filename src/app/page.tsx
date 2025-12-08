@@ -79,11 +79,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-12">
       <div className="mx-auto max-w-4xl px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Listing Asset Generator</h1>
-        
-        <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Listing Asset Generator</h1>
+
+        <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="space-y-6">
             <div>
               <label htmlFor="productName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -188,11 +188,11 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-6 flex gap-3">
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="flex-1 bg-blue-600 text-white py-2 px-4 text-sm sm:text-base rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {loading ? 'Generating...' : 'Generate Listing Assets'}
             </button>
@@ -200,7 +200,7 @@ export default function Home() {
               type="button"
               onClick={handleClear}
               disabled={loading}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              className="px-6 py-2 text-sm sm:text-base border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
               Clear Form
             </button>
@@ -208,9 +208,9 @@ export default function Home() {
         </form>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+          <div className="bg-red-50 border border-red-200 rounded-md p-3 sm:p-4 mb-4 sm:mb-6">
             <div className="flex">
-              <div className="text-red-700">
+              <div className="text-red-700 text-sm sm:text-base">
                 <strong>Error:</strong> {error}
               </div>
             </div>
@@ -218,16 +218,16 @@ export default function Home() {
         )}
 
         {assets && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Generated Listing Assets</h2>
+          <div className="bg-white shadow rounded-lg p-4 sm:p-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Generated Listing Assets</h2>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg font-semibold text-gray-700">Title</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-700">Title</h3>
                   <button
                     onClick={() => handleCopy(assets.title, 'title')}
-                    className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors"
+                    className="flex items-center gap-1 px-2 sm:px-3 py-1 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors"
                   >
                     {copiedField === 'title' ? (
                       <>

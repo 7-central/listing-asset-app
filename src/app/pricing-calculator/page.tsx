@@ -187,74 +187,76 @@ export default function PricingCalculator() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-5xl mx-auto p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Pricing Calculator</h1>
-        <p className="text-gray-600 mb-8">
+      <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Pricing Calculator</h1>
+        <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
           Work out sustainable listing prices for Etsy, WooCommerce, and Amazon Handmade based on materials, labour, overheads, shipping, and marketplace fees.
         </p>
 
         {/* Bill of Materials Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Bill of Materials</h2>
-          <p className="text-sm text-gray-600 mb-4">Enter all material costs per unit (net, excluding VAT)</p>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Bill of Materials</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Enter all material costs per unit (net, excluding VAT)</p>
 
           <div className="space-y-3">
             {bomItems.map((item, index) => (
-              <div key={item.id} className="flex gap-3 items-center">
+              <div key={item.id} className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:items-center border-b sm:border-0 pb-3 sm:pb-0">
                 <input
                   type="text"
                   value={item.description}
                   onChange={(e) => updateBomItem(item.id, 'description', e.target.value)}
                   placeholder="Part description (e.g., 14x14cm slate)"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-600">£</span>
-                  <input
-                    type="number"
-                    value={item.costPerUnit || ''}
-                    onChange={(e) => updateBomItem(item.id, 'costPerUnit', parseFloat(e.target.value) || 0)}
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    className="w-24 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                <div className="flex items-center gap-2 justify-between sm:justify-start">
+                  <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                    <span className="text-gray-600 text-sm">£</span>
+                    <input
+                      type="number"
+                      value={item.costPerUnit || ''}
+                      onChange={(e) => updateBomItem(item.id, 'costPerUnit', parseFloat(e.target.value) || 0)}
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      className="w-full sm:w-24 px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  {bomItems.length > 1 && (
+                    <button
+                      onClick={() => removeBomRow(item.id)}
+                      className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md whitespace-nowrap"
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
-                {bomItems.length > 1 && (
-                  <button
-                    onClick={() => removeBomRow(item.id)}
-                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-md"
-                  >
-                    Remove
-                  </button>
-                )}
               </div>
             ))}
           </div>
 
           <button
             onClick={addBomRow}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            className="mt-4 px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
             Add line
           </button>
 
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-gray-900">Total materials cost (net):</span>
-              <span className="text-lg font-bold text-gray-900">{formatCurrency(totalMaterialsCostNet)}</span>
+          <div className="mt-4 sm:mt-6 pt-4 border-t border-gray-200">
+            <div className="flex justify-between items-center gap-2">
+              <span className="font-semibold text-gray-900 text-sm sm:text-base">Total materials cost (net):</span>
+              <span className="text-base sm:text-lg font-bold text-gray-900">{formatCurrency(totalMaterialsCostNet)}</span>
             </div>
           </div>
         </div>
 
         {/* Labour Costs Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Labour Costs</h2>
-          <p className="text-sm text-gray-600 mb-4">Calculate labour cost per unit (net, excluding VAT)</p>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Labour Costs</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Calculate labour cost per unit (net, excluding VAT)</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Labour time per unit (mins)
               </label>
               <input
@@ -263,12 +265,12 @@ export default function PricingCalculator() {
                 onChange={(e) => setLabourTimeMinutes(parseFloat(e.target.value) || 0)}
                 min="0"
                 step="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Labour rate (£/hour)
               </label>
               <input
@@ -277,26 +279,26 @@ export default function PricingCalculator() {
                 onChange={(e) => setLabourRatePerHour(parseFloat(e.target.value) || 0)}
                 min="0"
                 step="0.5"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-gray-900">Labour cost per unit (net):</span>
-              <span className="text-lg font-bold text-gray-900">{formatCurrency(labourCostPerUnitNet)}</span>
+          <div className="mt-4 sm:mt-6 pt-4 border-t border-gray-200">
+            <div className="flex justify-between items-center gap-2">
+              <span className="font-semibold text-gray-900 text-sm sm:text-base">Labour cost per unit (net):</span>
+              <span className="text-base sm:text-lg font-bold text-gray-900">{formatCurrency(labourCostPerUnitNet)}</span>
             </div>
           </div>
         </div>
 
         {/* Overhead Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Overhead</h2>
-          <p className="text-sm text-gray-600 mb-4">Business overheads as a percentage of materials + labour</p>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Overhead</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Business overheads as a percentage of materials + labour</p>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Overhead % on materials + labour
             </label>
             <input
@@ -305,28 +307,28 @@ export default function PricingCalculator() {
               onChange={(e) => setOverheadPercentage(parseFloat(e.target.value) || 0)}
               min="0"
               step="1"
-              className="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full md:w-48 px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-gray-900">Overhead cost per unit (net):</span>
-              <span className="text-lg font-bold text-gray-900">{formatCurrency(overheadCostPerUnitNet)}</span>
+          <div className="mt-4 sm:mt-6 pt-4 border-t border-gray-200">
+            <div className="flex justify-between items-center gap-2">
+              <span className="font-semibold text-gray-900 text-sm sm:text-base">Overhead cost per unit (net):</span>
+              <span className="text-base sm:text-lg font-bold text-gray-900">{formatCurrency(overheadCostPerUnitNet)}</span>
             </div>
           </div>
         </div>
 
         {/* Shipping Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Shipping</h2>
-          <p className="text-sm text-gray-600 mb-4">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Shipping</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
             Get Royal Mail guidance based on your packed dimensions and weight. All costs are net (excluding VAT).
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Weight (g)
               </label>
               <input
@@ -335,12 +337,12 @@ export default function PricingCalculator() {
                 onChange={(e) => setWeightGrams(parseFloat(e.target.value) || 0)}
                 min="0"
                 step="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Width (mm)
               </label>
               <input
@@ -349,12 +351,12 @@ export default function PricingCalculator() {
                 onChange={(e) => setWidthMm(parseFloat(e.target.value) || 0)}
                 min="0"
                 step="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Height (mm)
               </label>
               <input
@@ -363,12 +365,12 @@ export default function PricingCalculator() {
                 onChange={(e) => setHeightMm(parseFloat(e.target.value) || 0)}
                 min="0"
                 step="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 Depth (mm)
               </label>
               <input
@@ -377,7 +379,7 @@ export default function PricingCalculator() {
                 onChange={(e) => setDepthMm(parseFloat(e.target.value) || 0)}
                 min="0"
                 step="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -385,7 +387,7 @@ export default function PricingCalculator() {
           <button
             onClick={calculateRoyalMailOptions}
             disabled={shippingLoading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             {shippingLoading ? 'Calculating...' : 'Calculate Royal Mail options'}
           </button>
@@ -409,26 +411,26 @@ export default function PricingCalculator() {
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mt-4 sm:mt-6 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Actual postage cost (net) - Manual override
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-gray-600">£</span>
+                <span className="text-gray-600 text-sm">£</span>
                 <input
                   type="number"
                   value={manualShippingCost || ''}
                   onChange={(e) => setManualShippingCost(parseFloat(e.target.value) || 0)}
                   min="0"
                   step="0.01"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                 Shipping overhead % (packaging, labels, etc.)
               </label>
               <input
@@ -437,58 +439,58 @@ export default function PricingCalculator() {
                 onChange={(e) => setShippingOverheadPercentage(parseFloat(e.target.value) || 0)}
                 min="0"
                 step="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-gray-200 space-y-2">
-            <div className="flex justify-between items-center text-sm">
+          <div className="mt-4 sm:mt-6 pt-4 border-t border-gray-200 space-y-2">
+            <div className="flex justify-between items-start sm:items-center gap-2 text-xs sm:text-sm">
               <span className="text-gray-700">Actual postage cost (net):</span>
               <span className="font-semibold text-gray-900">{formatCurrency(actualShippingCostNet)}</span>
             </div>
-            <div className="flex justify-between items-center text-sm">
+            <div className="flex justify-between items-start sm:items-center gap-2 text-xs sm:text-sm">
               <span className="text-gray-700">Shipping overhead amount (net):</span>
               <span className="font-semibold text-gray-900">{formatCurrency(shippingOverheadAmount)}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-gray-900">Suggested shipping charge to customer (net):</span>
-              <span className="text-lg font-bold text-gray-900">{formatCurrency(suggestedShippingChargeNet)}</span>
+            <div className="flex justify-between items-start sm:items-center gap-2">
+              <span className="font-semibold text-gray-900 text-xs sm:text-base">Suggested shipping charge to customer (net):</span>
+              <span className="text-sm sm:text-lg font-bold text-gray-900">{formatCurrency(suggestedShippingChargeNet)}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-gray-900">Suggested shipping charge to customer (gross inc VAT):</span>
-              <span className="text-lg font-bold text-blue-600">{formatCurrency(suggestedShippingChargeGross)}</span>
+            <div className="flex justify-between items-start sm:items-center gap-2">
+              <span className="font-semibold text-gray-900 text-xs sm:text-base">Suggested shipping charge (gross inc VAT):</span>
+              <span className="text-sm sm:text-lg font-bold text-blue-600">{formatCurrency(suggestedShippingChargeGross)}</span>
             </div>
           </div>
         </div>
 
         {/* Marketplace & Fees Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Marketplace & Fees</h2>
-          <p className="text-sm text-gray-600 mb-4">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Marketplace & Fees</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
             Select your marketplace to apply typical fees. These are approximate 2025 rates and should be reviewed periodically.
           </p>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               Marketplace
             </label>
             <select
               value={marketplace}
               onChange={(e) => setMarketplace(e.target.value as MarketplaceOption)}
-              className="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all-worst-case">All (worst case across Etsy / Woo / Amazon Handmade)</option>
+              <option value="all-worst-case">All (worst case)</option>
               <option value="etsy">Etsy</option>
               <option value="woocommerce">WooCommerce (Stripe)</option>
               <option value="amazon-handmade">Amazon Handmade</option>
             </select>
           </div>
 
-          <div className="mt-4 p-4 bg-gray-50 rounded-md">
-            <h3 className="font-semibold text-gray-900 mb-2">Fee assumptions for {MARKETPLACE_FEES[marketplace].name}:</h3>
-            <div className="space-y-1 text-sm text-gray-700">
-              <p><span className="font-medium">Percentage fee:</span> {formatPercentage(MARKETPLACE_FEES[marketplace].percentageFee)} (applied on item price + shipping)</p>
+          <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-gray-50 rounded-md">
+            <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Fee assumptions for {MARKETPLACE_FEES[marketplace].name}:</h3>
+            <div className="space-y-1 text-xs sm:text-sm text-gray-700">
+              <p><span className="font-medium">Percentage fee:</span> {formatPercentage(MARKETPLACE_FEES[marketplace].percentageFee)} (on item + shipping)</p>
               <p><span className="font-medium">Fixed per-order fee:</span> {formatCurrency(MARKETPLACE_FEES[marketplace].fixedFee)}</p>
               <p className="text-xs text-gray-600 mt-2">{MARKETPLACE_FEES[marketplace].notes}</p>
             </div>
@@ -496,14 +498,14 @@ export default function PricingCalculator() {
         </div>
 
         {/* VAT Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">VAT Settings</h2>
-          <p className="text-sm text-gray-600 mb-4">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">VAT Settings</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
             All input costs above are net (ex VAT). Listing prices will be shown as gross (inc VAT).
           </p>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               VAT %
             </label>
             <input
@@ -512,15 +514,15 @@ export default function PricingCalculator() {
               onChange={(e) => setVatPercentage(parseFloat(e.target.value) || 0)}
               min="0"
               step="0.1"
-              className="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full md:w-48 px-3 sm:px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
 
         {/* Pricing Summary Section */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Pricing Summary</h2>
-          <p className="text-sm text-gray-600 mb-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Pricing Summary</h2>
+          <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
             Suggested prices for different markup bands. The 50% markup band is highlighted as the recommended option.
           </p>
 
@@ -531,7 +533,7 @@ export default function PricingCalculator() {
               </p>
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-8">
               {markupBands.map((markup) => {
                 const pricing = calculatePricingForMarkup(markup);
                 const isRecommended = markup === 50;
@@ -539,44 +541,44 @@ export default function PricingCalculator() {
                 return (
                   <div
                     key={markup}
-                    className={`border rounded-lg p-6 ${
+                    className={`border rounded-lg p-3 sm:p-6 ${
                       isRecommended ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">{markup}% Markup</h3>
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">{markup}% Markup</h3>
                       {isRecommended && (
-                        <span className="px-3 py-1 bg-blue-500 text-white text-sm font-medium rounded-full">
+                        <span className="px-2 sm:px-3 py-1 bg-blue-500 text-white text-xs sm:text-sm font-medium rounded-full">
                           Recommended
                         </span>
                       )}
                     </div>
 
                     {/* Cost Breakdown */}
-                    <div className="mb-4">
-                      <h4 className="font-medium text-gray-900 mb-2">Cost breakdown (net):</h4>
-                      <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
+                    <div className="mb-3 sm:mb-4">
+                      <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Cost breakdown (net):</h4>
+                      <div className="space-y-1 text-xs sm:text-sm">
+                        <div className="flex justify-between gap-2">
                           <span className="text-gray-700">Total materials cost:</span>
                           <span className="text-gray-900">{formatCurrency(totalMaterialsCostNet)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                           <span className="text-gray-700">Labour cost:</span>
                           <span className="text-gray-900">{formatCurrency(labourCostPerUnitNet)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                           <span className="text-gray-700">Overhead cost:</span>
                           <span className="text-gray-900">{formatCurrency(overheadCostPerUnitNet)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                           <span className="text-gray-700">Actual shipping cost:</span>
                           <span className="text-gray-900">{formatCurrency(actualShippingCostNet)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                           <span className="text-gray-700">Shipping overhead amount:</span>
                           <span className="text-gray-900">{formatCurrency(shippingOverheadAmount)}</span>
                         </div>
-                        <div className="flex justify-between pt-2 border-t border-gray-300">
+                        <div className="flex justify-between gap-2 pt-2 border-t border-gray-300">
                           <span className="font-semibold text-gray-900">Base cost per unit:</span>
                           <span className="font-semibold text-gray-900">{formatCurrency(baseCostPerUnitNet)}</span>
                         </div>
@@ -584,26 +586,26 @@ export default function PricingCalculator() {
                     </div>
 
                     {/* Price Suggestions */}
-                    <div className="mb-4">
-                      <h4 className="font-medium text-gray-900 mb-2">Price suggestions:</h4>
-                      <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
+                    <div className="mb-3 sm:mb-4">
+                      <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Price suggestions:</h4>
+                      <div className="space-y-1 text-xs sm:text-sm">
+                        <div className="flex justify-between gap-2">
                           <span className="text-gray-700">Net item price (ex VAT):</span>
                           <span className="text-gray-900">{formatCurrency(pricing.netItemPrice)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                           <span className="font-semibold text-gray-900">Gross item price (inc VAT) - calculated:</span>
                           <span className="font-semibold text-gray-900">{formatCurrency(pricing.grossItemPrice)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                           <span className="font-semibold text-blue-600">Gross item price (inc VAT) - rounded to .95:</span>
                           <span className="font-bold text-blue-600">{formatCurrency(pricing.roundedGrossPrice)}</span>
                         </div>
-                        <div className="flex justify-between pt-2">
+                        <div className="flex justify-between gap-2 pt-2">
                           <span className="text-gray-700">Suggested shipping charge (net):</span>
                           <span className="text-gray-900">{formatCurrency(suggestedShippingChargeNet)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                           <span className="text-gray-700">Suggested shipping charge (gross inc VAT):</span>
                           <span className="text-gray-900">{formatCurrency(suggestedShippingChargeGross)}</span>
                         </div>
@@ -612,24 +614,24 @@ export default function PricingCalculator() {
 
                     {/* Marketplace Impact */}
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Marketplace impact:</h4>
-                      <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
+                      <h4 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Marketplace impact:</h4>
+                      <div className="space-y-1 text-xs sm:text-sm">
+                        <div className="flex justify-between gap-2">
                           <span className="text-gray-700">Estimated marketplace fees:</span>
                           <span className="text-gray-900">{formatCurrency(pricing.marketplaceFees)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                           <span className="text-gray-700">Effective margin % after costs and fees:</span>
                           <span className="text-gray-900">{formatPercentage(pricing.effectiveMargin)}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between gap-2">
                           <span className="font-semibold text-gray-900">Profit per unit (net):</span>
                           <span className={`font-semibold ${pricing.profitNet > 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {formatCurrency(pricing.profitNet)}
                           </span>
                         </div>
                         {labourTimeMinutes > 0 && (
-                          <div className="flex justify-between">
+                          <div className="flex justify-between gap-2">
                             <span className="font-semibold text-gray-900">Profit per hour (net):</span>
                             <span className={`font-semibold ${pricing.profitPerHour > 0 ? 'text-green-600' : 'text-red-600'}`}>
                               {formatCurrency(pricing.profitPerHour)}

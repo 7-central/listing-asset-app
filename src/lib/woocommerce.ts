@@ -315,3 +315,33 @@ export async function createDraftVariableProduct(params: {
     adminEditUrl,
   };
 }
+
+// Fetch all products (for dropdown list in social media manager)
+export async function fetchAllProducts(): Promise<any[]> {
+  const allProducts: any[] = [];
+  let page = 1;
+  const perPage = 100;
+
+  while (true) {
+    const products = await wooApiCall<any[]>(
+      `/wp-json/wc/v3/products?per_page=${perPage}&page=${page}&status=publish`
+    );
+
+    if (products.length === 0) break;
+
+    allProducts.push(...products);
+
+    if (products.length < perPage) break;
+    page++;
+  }
+
+  console.log(`[WooCommerce] Fetched ${allProducts.length} products`);
+  return allProducts;
+}
+
+// Fetch a single product by ID with full details
+export async function fetchProductById(productId: number): Promise<any> {
+  console.log(`[WooCommerce] Fetching product ${productId}`);
+  const product = await wooApiCall<any>(`/wp-json/wc/v3/products/${productId}`);
+  return product;
+}

@@ -1,4 +1,4 @@
-import { ListingInput, ListingAssets, RoyalMailAdviceRequest, RoyalMailAdviceResponse } from './types';
+import { ListingInput, ListingAssets, RoyalMailAdviceRequest, RoyalMailAdviceResponse, GenerateSocialPostsRequest, GenerateSocialPostsResponse } from './types';
 
 export async function generateListingAssets(input: ListingInput): Promise<ListingAssets> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -221,6 +221,163 @@ Choose the most cost-effective Royal Mail service that accommodates these dimens
 - Medium Parcel (max 610mm x 460mm x 460mm, 2-20kg)
 
 Provide realistic 2025 UK pricing (net, excluding VAT) based on typical Royal Mail rates. Be conservative and round up slightly.
+
+Respond with ONLY the JSON object, no other text or explanations.`;
+}
+
+export async function generateSocialMediaPosts(input: GenerateSocialPostsRequest): Promise<GenerateSocialPostsResponse> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY environment variable is not set');
+  }
+
+  const prompt = buildSocialMediaPrompt(input);
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2500,
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Anthropic API error: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.content?.[0]?.text) {
+    throw new Error('No content returned from Anthropic API');
+  }
+
+  let content = data.content[0].text.trim();
+
+  // Strip markdown code blocks if present
+  if (content.startsWith('```')) {
+    content = content.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+  }
+
+  let parsedPosts: unknown;
+  try {
+    parsedPosts = JSON.parse(content);
+  } catch (error) {
+    throw new Error(`Failed to parse Anthropic response as JSON: ${error}`);
+  }
+
+  // Basic runtime validation
+  if (!parsedPosts || typeof parsedPosts !== 'object') {
+    throw new Error('Invalid response: expected object');
+  }
+
+  const postsObj = parsedPosts as Record<string, unknown>;
+
+  if (!Array.isArray(postsObj.posts)) {
+    throw new Error('Invalid response: posts must be an array');
+  }
+
+  // Validate each post
+  postsObj.posts.forEach((post: any, index: number) => {
+    if (!post.text || typeof post.text !== 'string') {
+      throw new Error(`Invalid response: post ${index} must have text field`);
+    }
+    if (typeof post.imageIndex !== 'number') {
+      throw new Error(`Invalid response: post ${index} must have imageIndex field`);
+    }
+    if (!post.platform || typeof post.platform !== 'string') {
+      throw new Error(`Invalid response: post ${index} must have platform field`);
+    }
+  });
+
+  // Map imageIndex to actual image URLs
+  const posts = postsObj.posts.map((post: any) => {
+    const imageIndex = Math.min(post.imageIndex, input.imageUrls.length - 1);
+    const imageUrl = input.imageUrls[imageIndex] || input.imageUrls[0] || '';
+
+    return {
+      text: post.text,
+      imageUrl,
+      imageAlt: input.productName,
+      platform: post.platform,
+      characterCount: post.text.length,
+    };
+  });
+
+  return { posts };
+}
+
+function buildSocialMediaPrompt(input: GenerateSocialPostsRequest): string {
+  const categoryList = input.categories.length > 0 ? input.categories.join(', ') : 'N/A';
+  const tagList = input.tags.length > 0 ? input.tags.join(', ') : 'N/A';
+
+  return `You are a social media marketing expert for a handmade crafts business. Generate 5 engaging social media posts for the following product:
+
+Product Name: ${input.productName}
+Price: £${input.price}
+Description: ${input.description}
+Short Description: ${input.shortDescription}
+Categories: ${categoryList}
+Tags: ${tagList}
+Available Images: ${input.imageUrls.length} product images
+
+Generate 5 unique posts optimized for Facebook and Instagram. Each post should:
+- Be engaging and encourage interaction
+- Use appropriate emojis naturally (not excessively)
+- Include a call-to-action
+- Vary in style (e.g., storytelling, behind-the-scenes, features, benefits, lifestyle)
+- Stay within character limits (Facebook: 400 chars recommended, Instagram: 300 chars recommended)
+- NOT include hashtags (we'll add those separately)
+- NOT include URLs or links
+- Reference specific product features or benefits
+
+You must respond with ONLY valid JSON in this exact format:
+{
+  "posts": [
+    {
+      "text": "First engaging post text here...",
+      "imageIndex": 0,
+      "platform": "both"
+    },
+    {
+      "text": "Second post with different angle...",
+      "imageIndex": 0,
+      "platform": "both"
+    },
+    {
+      "text": "Third post highlighting benefits...",
+      "imageIndex": 0,
+      "platform": "both"
+    },
+    {
+      "text": "Fourth post with storytelling...",
+      "imageIndex": 0,
+      "platform": "both"
+    },
+    {
+      "text": "Fifth post with call to action...",
+      "imageIndex": 0,
+      "platform": "both"
+    }
+  ]
+}
+
+Important:
+- imageIndex refers to which product image to use (0 to ${input.imageUrls.length - 1})
+- platform should be "both" (for Facebook and Instagram)
+- Keep posts concise, authentic, and brand-appropriate for a handmade crafts business
+- Vary the imageIndex if there are multiple images to show different angles
 
 Respond with ONLY the JSON object, no other text or explanations.`;
 }

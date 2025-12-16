@@ -1,4 +1,4 @@
-import { ListingInput, ListingAssets } from './types';
+import { ListingInput, ListingAssets, ScheduledSocialPost } from './types';
 
 export async function createAirtableListing(input: ListingInput, assets: ListingAssets): Promise<void> {
   const baseId = process.env.AIRTABLE_BASE_ID;
@@ -47,4 +47,91 @@ export async function createAirtableListing(input: ListingInput, assets: Listing
     const errorText = await response.text();
     throw new Error(`Airtable API error: ${response.status} ${response.statusText} - ${errorText}`);
   }
+}
+
+// Save scheduled social media posts to Airtable
+export async function createScheduledSocialPosts(posts: Omit<ScheduledSocialPost, 'id'>[]): Promise<void> {
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  const token = process.env.AIRTABLE_TOKEN;
+  const tableName = 'Scheduled Social Posts'; // New table for social posts
+
+  if (!baseId) {
+    throw new Error('AIRTABLE_BASE_ID environment variable is not set');
+  }
+  if (!token) {
+    throw new Error('AIRTABLE_TOKEN environment variable is not set');
+  }
+
+  // Create records in batch
+  const records = posts.map((post) => ({
+    fields: {
+      'Post Text': post.postText,
+      'Image URL': post.imageUrl,
+      'Product ID': post.productId,
+      'Product Name': post.productName,
+      'Scheduled Date/Time': post.scheduledDateTime,
+      'Status': post.status,
+      'Platform': post.platform,
+    },
+  }));
+
+  const response = await fetch(
+    `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ records }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Airtable API error: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+}
+
+// Fetch all scheduled social posts
+export async function fetchScheduledSocialPosts(): Promise<ScheduledSocialPost[]> {
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  const token = process.env.AIRTABLE_TOKEN;
+  const tableName = 'Scheduled Social Posts';
+
+  if (!baseId) {
+    throw new Error('AIRTABLE_BASE_ID environment variable is not set');
+  }
+  if (!token) {
+    throw new Error('AIRTABLE_TOKEN environment variable is not set');
+  }
+
+  const response = await fetch(
+    `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}?sort[0][field]=Scheduled+Date%2FTime&sort[0][direction]=asc`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Airtable API error: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  return data.records.map((record: any) => ({
+    id: record.id,
+    postText: record.fields['Post Text'] || '',
+    imageUrl: record.fields['Image URL'] || '',
+    productId: record.fields['Product ID'] || 0,
+    productName: record.fields['Product Name'] || '',
+    scheduledDateTime: record.fields['Scheduled Date/Time'] || '',
+    status: record.fields['Status'] || 'scheduled',
+    platform: record.fields['Platform'] || 'both',
+    postedDateTime: record.fields['Posted Date/Time'],
+    errorMessage: record.fields['Error Message'],
+  }));
 }

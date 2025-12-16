@@ -92,3 +92,73 @@ export type WooErrorResponse = {
     message: string;
   };
 };
+
+// Social Media Manager Types
+
+export type WooProduct = {
+  id: number;
+  name: string;
+  description: string;
+  short_description: string;
+  price: string;
+  regular_price: string;
+  images: {
+    id: number;
+    src: string;
+    alt: string;
+  }[];
+  categories: {
+    id: number;
+    name: string;
+  }[];
+  tags: {
+    id: number;
+    name: string;
+  }[];
+  permalink: string;
+};
+
+export type WooProductListItem = {
+  id: number;
+  name: string;
+  price: string;
+  thumbnail: string;
+};
+
+export type SocialMediaPost = {
+  id: string;
+  text: string;
+  imageUrl: string;
+  imageAlt: string;
+  platform: 'facebook' | 'instagram' | 'both';
+  scheduledDateTime?: string; // ISO 8601 format
+  characterCount: number;
+};
+
+export type GenerateSocialPostsRequest = {
+  productId: number;
+  productName: string;
+  description: string;
+  shortDescription: string;
+  price: string;
+  categories: string[];
+  tags: string[];
+  imageUrls: string[];
+};
+
+export type GenerateSocialPostsResponse = {
+  posts: Omit<SocialMediaPost, 'id' | 'scheduledDateTime'>[];
+};
+
+export type ScheduledSocialPost = {
+  id?: string; // Airtable record ID
+  postText: string;
+  imageUrl: string;
+  productId: number;
+  productName: string;
+  scheduledDateTime: string; // ISO 8601
+  status: 'scheduled' | 'posted' | 'failed';
+  platform: 'facebook' | 'instagram' | 'both';
+  postedDateTime?: string;
+  errorMessage?: string;
+};

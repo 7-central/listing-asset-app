@@ -55,3 +55,40 @@ export type MarketplaceFeeConfig = {
   fixedFee: number; // Fixed fee in £
   notes: string;
 };
+
+// WooCommerce Integration Types
+
+export type WooVariationAttribute = {
+  name: string; // e.g., "Colour", "Size"
+  options: string[]; // e.g., ["Red", "Blue", "Green"]
+};
+
+export type WooCategoryTag = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
+export type WooCreateDraftRequest = {
+  name: string; // Product title
+  description: string; // Long description (HTML)
+  short_description: string; // Short description
+  variationAttributes: WooVariationAttribute[];
+  categoryIds: number[];
+  tagIds: number[];
+};
+
+export type WooCreateDraftResponse = {
+  productId: number;
+  permalink: string;
+  adminEditUrl: string;
+};
+
+export type WooErrorResponse = {
+  ok: false;
+  error: string;
+  details?: {
+    status: number;
+    message: string;
+  };
+};

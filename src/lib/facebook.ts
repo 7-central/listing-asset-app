@@ -52,41 +52,38 @@ export async function postToFacebookPage(
     throw new Error('Post message cannot be empty');
   }
 
-  // Build the Graph API endpoint
+  // Build the Graph API endpoint and form data
   const apiVersion = 'v24.0';
   let endpoint: string;
-  let body: Record<string, any>;
+  const formData = new URLSearchParams();
 
   if (imageUrl) {
     // Post with photo using /photos endpoint
     endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/photos`;
-    body = {
-      url: imageUrl,
-      caption: message,
-      access_token: pageAccessToken,
-    };
+    formData.append('url', imageUrl);
+    formData.append('caption', message);
   } else {
     // Text-only post using /feed endpoint
     endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/feed`;
-    body = {
-      message: message,
-      access_token: pageAccessToken,
-    };
+    formData.append('message', message);
   }
+
+  // Add access token to form data
+  formData.append('access_token', pageAccessToken);
 
   // Add scheduled publish time if provided
   if (scheduledPublishTime) {
-    body.published = false;
-    body.scheduled_publish_time = scheduledPublishTime;
+    formData.append('published', 'false');
+    formData.append('scheduled_publish_time', scheduledPublishTime.toString());
   }
 
-  // Make the API request
+  // Make the API request with form-encoded data
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify(body),
+    body: formData.toString(),
   });
 
   const data = await response.json();
@@ -134,15 +131,16 @@ export async function publishScheduledPost(postId: string): Promise<boolean> {
   const apiVersion = 'v24.0';
   const endpoint = `https://graph.facebook.com/${apiVersion}/${postId}`;
 
+  const formData = new URLSearchParams();
+  formData.append('is_published', 'true');
+  formData.append('access_token', pageAccessToken);
+
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify({
-      is_published: true,
-      access_token: pageAccessToken,
-    }),
+    body: formData.toString(),
   });
 
   if (!response.ok) {

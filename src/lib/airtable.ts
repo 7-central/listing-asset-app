@@ -53,7 +53,7 @@ export async function createAirtableListing(input: ListingInput, assets: Listing
 export async function createScheduledSocialPosts(posts: Omit<ScheduledSocialPost, 'id'>[]): Promise<void> {
   const baseId = process.env.AIRTABLE_BASE_ID;
   const token = process.env.AIRTABLE_TOKEN;
-  const tableName = 'Scheduled Social Posts'; // New table for social posts
+  const tableName = 'LW Listing Assets'; // Use existing table
 
   if (!baseId) {
     throw new Error('AIRTABLE_BASE_ID environment variable is not set');
@@ -103,7 +103,7 @@ export async function createScheduledSocialPosts(posts: Omit<ScheduledSocialPost
 export async function fetchScheduledSocialPosts(): Promise<ScheduledSocialPost[]> {
   const baseId = process.env.AIRTABLE_BASE_ID;
   const token = process.env.AIRTABLE_TOKEN;
-  const tableName = 'Scheduled Social Posts';
+  const tableName = 'LW Listing Assets';
 
   if (!baseId) {
     throw new Error('AIRTABLE_BASE_ID environment variable is not set');
@@ -112,8 +112,11 @@ export async function fetchScheduledSocialPosts(): Promise<ScheduledSocialPost[]
     throw new Error('AIRTABLE_TOKEN environment variable is not set');
   }
 
+  // Filter to only get social media posts (records with Post Text field)
+  const filterFormula = encodeURIComponent("AND({Post Text} != '', {Post Text} != BLANK())");
+
   const response = await fetch(
-    `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}?sort[0][field]=Scheduled+Date%2FTime&sort[0][direction]=asc`,
+    `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}?filterByFormula=${filterFormula}&sort[0][field]=Scheduled+Date%2FTime&sort[0][direction]=asc`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -157,7 +160,7 @@ export async function updateScheduledSocialPost(
 ): Promise<void> {
   const baseId = process.env.AIRTABLE_BASE_ID;
   const token = process.env.AIRTABLE_TOKEN;
-  const tableName = 'Scheduled Social Posts';
+  const tableName = 'LW Listing Assets';
 
   if (!baseId) {
     throw new Error('AIRTABLE_BASE_ID environment variable is not set');

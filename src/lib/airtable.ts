@@ -75,6 +75,9 @@ export async function createScheduledSocialPosts(posts: Omit<ScheduledSocialPost
     },
   }));
 
+  console.log('[Airtable] Creating records in table:', tableName);
+  console.log('[Airtable] Field names being sent:', Object.keys(records[0].fields));
+
   const response = await fetch(
     `https://api.airtable.com/v0/${baseId}/${encodeURIComponent(tableName)}`,
     {
@@ -89,6 +92,9 @@ export async function createScheduledSocialPosts(posts: Omit<ScheduledSocialPost
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error('[Airtable] Error response:', errorText);
+    console.error('[Airtable] Table name:', tableName);
+    console.error('[Airtable] Fields sent:', Object.keys(records[0].fields));
     throw new Error(`Airtable API error: ${response.status} ${response.statusText} - ${errorText}`);
   }
 }

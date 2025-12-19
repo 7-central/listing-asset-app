@@ -346,7 +346,7 @@ export default function SocialMediaManager() {
                   disabled={postingToFacebook}
                   className="w-full bg-green-600 text-white py-3 px-4 rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold"
                 >
-                  {postingToFacebook ? 'Posting to Facebook...' : 'Post Now to Facebook'}
+                  {postingToFacebook ? 'Posting to Facebook...' : 'Post To Facebook Now'}
                 </button>
               </div>
             </div>
@@ -361,7 +361,7 @@ export default function SocialMediaManager() {
               <li>Select a product from the dropdown</li>
               <li>Review the product details and click "Generate Facebook Post"</li>
               <li>Edit the generated post text if needed</li>
-              <li>Click "Post Now to Facebook" to publish immediately to your Facebook Business Page</li>
+              <li>Click "Post To Facebook Now" to publish immediately to your Facebook Business Page</li>
             </ol>
           </div>
         )}

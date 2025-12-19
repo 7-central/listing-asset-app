@@ -59,23 +59,23 @@ export async function postToFacebookPage(
 
   if (imageUrl) {
     // Post with photo using /photos endpoint
-    endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/photos`;
+    endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/photos?access_token=${encodeURIComponent(pageAccessToken)}`;
     formData.append('url', imageUrl);
     formData.append('caption', message);
   } else {
     // Text-only post using /feed endpoint
-    endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/feed`;
+    endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/feed?access_token=${encodeURIComponent(pageAccessToken)}`;
     formData.append('message', message);
   }
-
-  // Add access token to form data
-  formData.append('access_token', pageAccessToken);
 
   // Add scheduled publish time if provided
   if (scheduledPublishTime) {
     formData.append('published', 'false');
     formData.append('scheduled_publish_time', scheduledPublishTime.toString());
   }
+
+  console.log('[Facebook] Posting to endpoint:', endpoint.replace(pageAccessToken, 'TOKEN_HIDDEN'));
+  console.log('[Facebook] Form data:', Object.fromEntries(formData.entries()));
 
   // Make the API request with form-encoded data
   const response = await fetch(endpoint, {
@@ -88,8 +88,12 @@ export async function postToFacebookPage(
 
   const data = await response.json();
 
+  console.log('[Facebook] Response status:', response.status);
+  console.log('[Facebook] Response data:', JSON.stringify(data, null, 2));
+
   if (!response.ok) {
     const fbError = data as FacebookErrorResponse;
+    console.error('[Facebook] Full error object:', JSON.stringify(fbError, null, 2));
     throw new Error(
       `Facebook API error: ${fbError.error.message} (Code: ${fbError.error.code})`
     );
@@ -129,11 +133,10 @@ export async function publishScheduledPost(postId: string): Promise<boolean> {
   }
 
   const apiVersion = 'v24.0';
-  const endpoint = `https://graph.facebook.com/${apiVersion}/${postId}`;
+  const endpoint = `https://graph.facebook.com/${apiVersion}/${postId}?access_token=${encodeURIComponent(pageAccessToken)}`;
 
   const formData = new URLSearchParams();
   formData.append('is_published', 'true');
-  formData.append('access_token', pageAccessToken);
 
   const response = await fetch(endpoint, {
     method: 'POST',

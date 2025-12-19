@@ -54,18 +54,17 @@ export async function postToFacebookPage(
 
   // Build the Graph API endpoint and form data
   const apiVersion = 'v24.0';
-  let endpoint: string;
   const formData = new URLSearchParams();
 
+  // Use /feed endpoint for both text and images
+  // This has fewer restrictions than /photos endpoint
+  const endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/feed?access_token=${encodeURIComponent(pageAccessToken)}`;
+
+  formData.append('message', message);
+
+  // If there's an image, add it as a link attachment
   if (imageUrl) {
-    // Post with photo using /photos endpoint
-    endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/photos?access_token=${encodeURIComponent(pageAccessToken)}`;
-    formData.append('url', imageUrl);
-    formData.append('caption', message);
-  } else {
-    // Text-only post using /feed endpoint
-    endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/feed?access_token=${encodeURIComponent(pageAccessToken)}`;
-    formData.append('message', message);
+    formData.append('link', imageUrl);
   }
 
   // Add scheduled publish time if provided
@@ -106,12 +105,8 @@ export async function postToFacebookPage(
     throw new Error('Facebook API did not return a post ID');
   }
 
-  // Construct the post URL
-  // For photos: https://www.facebook.com/{page-id}/photos/{photo-id}
-  // For feed posts: https://www.facebook.com/{post-id}
-  const postUrl = imageUrl
-    ? `https://www.facebook.com/${pageId}/photos/${postId}`
-    : `https://www.facebook.com/${postId}`;
+  // Construct the post URL - all posts now use feed endpoint
+  const postUrl = `https://www.facebook.com/${postId}`;
 
   return {
     id: postId,

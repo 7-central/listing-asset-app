@@ -19,10 +19,14 @@ export default function SocialMediaManager() {
   const [scheduling, setScheduling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [scheduledPosts, setScheduledPosts] = useState<ScheduledSocialPost[]>([]);
+  const [loadingScheduledPosts, setLoadingScheduledPosts] = useState(false);
+  const [postingToFacebook, setPostingToFacebook] = useState<string | null>(null);
 
-  // Fetch all products on mount
+  // Fetch all products and scheduled posts on mount
   useEffect(() => {
     fetchProducts();
+    fetchScheduledPosts();
   }, []);
 
   const fetchProducts = async () => {
@@ -40,6 +44,23 @@ export default function SocialMediaManager() {
       setError('Failed to load products');
     } finally {
       setLoadingProducts(false);
+    }
+  };
+
+  const fetchScheduledPosts = async () => {
+    setLoadingScheduledPosts(true);
+    try {
+      const response = await fetch('/api/social-posts');
+      const data = await response.json();
+      if (data.ok) {
+        setScheduledPosts(data.posts);
+      } else {
+        console.error('Failed to load scheduled posts:', data.error);
+      }
+    } catch (err) {
+      console.error('Failed to load scheduled posts');
+    } finally {
+      setLoadingScheduledPosts(false);
     }
   };
 
@@ -174,6 +195,8 @@ export default function SocialMediaManager() {
 
       if (data.ok) {
         setSuccess(`Successfully scheduled ${posts.length} posts!`);
+        // Refresh scheduled posts list
+        await fetchScheduledPosts();
         // Clear posts after successful scheduling
         setTimeout(() => {
           setPosts([]);
@@ -186,6 +209,43 @@ export default function SocialMediaManager() {
       setError('Network error while scheduling posts');
     } finally {
       setScheduling(false);
+    }
+  };
+
+  const handlePostToFacebook = async (post: ScheduledSocialPost) => {
+    if (!post.id) return;
+
+    setPostingToFacebook(post.id);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch('/api/facebook/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          airtableRecordId: post.id,
+          message: post.postText,
+          imageUrl: post.imageUrl,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        setSuccess(`Successfully posted to Facebook! View: ${data.facebookPostUrl}`);
+        // Refresh scheduled posts to show updated status
+        await fetchScheduledPosts();
+        setTimeout(() => {
+          setSuccess(null);
+        }, 5000);
+      } else {
+        setError(`Failed to post to Facebook: ${data.error}`);
+      }
+    } catch (err) {
+      setError('Network error while posting to Facebook');
+    } finally {
+      setPostingToFacebook(null);
     }
   };
 
@@ -408,6 +468,113 @@ export default function SocialMediaManager() {
           </div>
         )}
 
+        {/* Scheduled Posts */}
+        <div className="bg-white shadow rounded-lg p-4 sm:p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">Scheduled Posts</h2>
+            <button
+              onClick={fetchScheduledPosts}
+              disabled={loadingScheduledPosts}
+              className="text-sm bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {loadingScheduledPosts ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
+
+          {loadingScheduledPosts ? (
+            <p className="text-gray-600">Loading scheduled posts...</p>
+          ) : scheduledPosts.length === 0 ? (
+            <p className="text-gray-600">No scheduled posts yet. Generate and schedule some posts above!</p>
+          ) : (
+            <div className="space-y-4">
+              {scheduledPosts.map((post) => {
+                const isPending = post.status === 'scheduled';
+                const isPosted = post.status === 'posted';
+                const isFailed = post.status === 'failed';
+                const isPosting = postingToFacebook === post.id;
+                const isFacebookPost = post.platform === 'facebook' || post.platform === 'both';
+
+                return (
+                  <div key={post.id} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Image */}
+                      <div>
+                        {post.imageUrl && (
+                          <img
+                            src={post.imageUrl}
+                            alt={post.productName}
+                            className="w-full h-32 object-cover rounded border"
+                          />
+                        )}
+                      </div>
+
+                      {/* Post Details */}
+                      <div className="md:col-span-2 space-y-2">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{post.productName}</h3>
+                            <p className="text-sm text-gray-600">
+                              Scheduled: {new Date(post.scheduledDateTime).toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <span
+                              className={`px-3 py-1 text-xs font-medium rounded-full ${
+                                isPosted
+                                  ? 'bg-green-100 text-green-800'
+                                  : isFailed
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}
+                            >
+                              {post.status}
+                            </span>
+                            <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
+                              {post.platform === 'both' ? 'Facebook & Instagram' : post.platform}
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="text-sm text-gray-700 line-clamp-3">{post.postText}</p>
+
+                        {isFailed && post.errorMessage && (
+                          <div className="bg-red-50 border border-red-200 rounded p-2">
+                            <p className="text-xs text-red-700">Error: {post.errorMessage}</p>
+                          </div>
+                        )}
+
+                        {isPosted && post.facebookPostUrl && (
+                          <div className="bg-green-50 border border-green-200 rounded p-2">
+                            <a
+                              href={post.facebookPostUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-green-700 hover:text-green-900 underline"
+                            >
+                              View on Facebook →
+                            </a>
+                          </div>
+                        )}
+
+                        {/* Post to Facebook Button */}
+                        {isFacebookPost && isPending && (
+                          <button
+                            onClick={() => handlePostToFacebook(post)}
+                            disabled={isPosting}
+                            className="bg-blue-600 text-white py-2 px-4 rounded text-sm hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          >
+                            {isPosting ? 'Posting...' : 'Post to Facebook Now'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Info Box */}
         {!selectedProduct && (
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
@@ -418,6 +585,7 @@ export default function SocialMediaManager() {
               <li>Edit the generated posts as needed</li>
               <li>Adjust the schedule dates/times for each post</li>
               <li>Click "Schedule All Posts" to save them to your schedule</li>
+              <li>View scheduled posts below and click "Post to Facebook Now" when ready</li>
             </ol>
           </div>
         )}

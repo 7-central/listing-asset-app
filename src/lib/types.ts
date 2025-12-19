@@ -161,4 +161,6 @@ export type ScheduledSocialPost = {
   platform: 'facebook' | 'instagram' | 'both';
   postedDateTime?: string;
   errorMessage?: string;
+  facebookPostId?: string; // Facebook post ID after posting
+  facebookPostUrl?: string; // Facebook post URL
 };

@@ -1,0 +1,28 @@
+2025-12-19 17:25:52.345 [info] [API] Scheduling 5 social posts
+2025-12-19 17:25:52.345 [info] [Airtable] Creating records in table: LW Listing Assets
+2025-12-19 17:25:52.346 [info] [Airtable] Field names being sent: [
+  'Post Text',
+  'Image URL',
+  'Product ID',
+  'Product Name',
+  'Scheduled Date/Time',
+  'Post Status',
+  'Platform'
+]
+2025-12-19 17:25:52.509 [error] [Airtable] Error response: {"error":{"type":"INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND","message":"Invalid permissions, or the requested model was not found. Check that both your user and your token have the required permissions, and that the model names and/or ids are correct."}}
+2025-12-19 17:25:52.509 [error] [Airtable] Table name: LW Listing Assets
+2025-12-19 17:25:52.509 [error] [Airtable] Fields sent: [
+  'Post Text',
+  'Image URL',
+  'Product ID',
+  'Product Name',
+  'Scheduled Date/Time',
+  'Post Status',
+  'Platform'
+]
+2025-12-19 17:25:52.511 [error] [API] Error scheduling posts: Error: Airtable API error: 403 Forbidden - {"error":{"type":"INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND","message":"Invalid permissions, or the requested model was not found. Check that both your user and your token have the required permissions, and that the model names and/or ids are correct."}}
+    at r (.next/server/chunks/[root-of-the-server]__7d07c7b3._.js:1:3177)
+    at async T (.next/server/chunks/[root-of-the-server]__7d07c7b3._.js:1:6384)
+    at async d (.next/server/chunks/[root-of-the-server]__7d07c7b3._.js:1:9763)
+    at async l (.next/server/chunks/[root-of-the-server]__7d07c7b3._.js:1:10801)
+    at async N (.next/server/chunks/[root-of-the-server]__7d07c7b3._.js:1:11879)

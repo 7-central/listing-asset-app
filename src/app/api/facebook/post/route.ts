@@ -1,35 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { postToFacebookPage } from '@/lib/facebook';
-import { updateScheduledSocialPost } from '@/lib/airtable';
 
 /**
  * POST /api/facebook/post
- * Posts a scheduled social media post to Facebook
+ * Posts directly to Facebook Business Page
  *
  * Request body:
  * {
- *   airtableRecordId: string;  // Airtable record ID to update
  *   message: string;            // Post text
  *   imageUrl?: string;          // Optional image URL
- *   scheduledPublishTime?: number; // Optional Unix timestamp for scheduled posts
  * }
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { airtableRecordId, message, imageUrl, scheduledPublishTime } = body;
+    const { message, imageUrl } = body;
 
     // Validate required fields
-    if (!airtableRecordId) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: 'airtableRecordId is required',
-        },
-        { status: 400 }
-      );
-    }
-
     if (!message || message.trim().length === 0) {
       return NextResponse.json(
         {
@@ -40,25 +27,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`[API] Posting to Facebook for record: ${airtableRecordId}`);
+    console.log(`[API] Posting to Facebook...`);
 
     try {
-      // Post to Facebook
-      const result = await postToFacebookPage(
-        message,
-        imageUrl,
-        scheduledPublishTime
-      );
+      // Post to Facebook immediately (no scheduling)
+      const result = await postToFacebookPage(message, imageUrl);
 
       console.log(`[API] Successfully posted to Facebook: ${result.postUrl}`);
-
-      // Update Airtable record with success
-      await updateScheduledSocialPost(airtableRecordId, {
-        status: scheduledPublishTime ? 'scheduled' : 'posted',
-        postedDateTime: scheduledPublishTime ? undefined : new Date().toISOString(),
-        facebookPostId: result.id,
-        facebookPostUrl: result.postUrl,
-      });
 
       return NextResponse.json({
         ok: true,
@@ -68,12 +43,6 @@ export async function POST(request: NextRequest) {
       });
     } catch (fbError: any) {
       console.error('[API] Facebook posting error:', fbError);
-
-      // Update Airtable record with failure
-      await updateScheduledSocialPost(airtableRecordId, {
-        status: 'failed',
-        errorMessage: fbError.message || 'Unknown Facebook API error',
-      });
 
       return NextResponse.json(
         {

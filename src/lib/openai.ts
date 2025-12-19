@@ -322,7 +322,7 @@ function buildSocialMediaPrompt(input: GenerateSocialPostsRequest): string {
   const categoryList = input.categories.length > 0 ? input.categories.join(', ') : 'N/A';
   const tagList = input.tags.length > 0 ? input.tags.join(', ') : 'N/A';
 
-  return `You are a social media marketing expert for a handmade crafts business. Generate 5 engaging social media posts for the following product:
+  return `You are a social media marketing expert for a handmade crafts business. Generate 1 engaging Facebook post for the following product:
 
 Product Name: ${input.productName}
 Price: £${input.price}
@@ -332,52 +332,31 @@ Categories: ${categoryList}
 Tags: ${tagList}
 Available Images: ${input.imageUrls.length} product images
 
-Generate 5 unique posts optimized for Facebook and Instagram. Each post should:
+Generate 1 engaging post optimized for Facebook. The post should:
 - Be engaging and encourage interaction
 - Use appropriate emojis naturally (not excessively)
 - Include a call-to-action
-- Vary in style (e.g., storytelling, behind-the-scenes, features, benefits, lifestyle)
-- Stay within character limits (Facebook: 400 chars recommended, Instagram: 300 chars recommended)
+- Highlight product features or benefits
+- Stay within 400 characters (recommended for Facebook)
 - NOT include hashtags (we'll add those separately)
 - NOT include URLs or links
-- Reference specific product features or benefits
+- Be authentic and brand-appropriate for a handmade crafts business
 
 You must respond with ONLY valid JSON in this exact format:
 {
   "posts": [
     {
-      "text": "First engaging post text here...",
+      "text": "Engaging post text here with emojis and call-to-action...",
       "imageIndex": 0,
-      "platform": "both"
-    },
-    {
-      "text": "Second post with different angle...",
-      "imageIndex": 0,
-      "platform": "both"
-    },
-    {
-      "text": "Third post highlighting benefits...",
-      "imageIndex": 0,
-      "platform": "both"
-    },
-    {
-      "text": "Fourth post with storytelling...",
-      "imageIndex": 0,
-      "platform": "both"
-    },
-    {
-      "text": "Fifth post with call to action...",
-      "imageIndex": 0,
-      "platform": "both"
+      "platform": "facebook"
     }
   ]
 }
 
 Important:
 - imageIndex refers to which product image to use (0 to ${input.imageUrls.length - 1})
-- platform should be "both" (for Facebook and Instagram)
-- Keep posts concise, authentic, and brand-appropriate for a handmade crafts business
-- Vary the imageIndex if there are multiple images to show different angles
+- platform should be "facebook"
+- Keep the post concise, authentic, and engaging
 
 Respond with ONLY the JSON object, no other text or explanations.`;
 }

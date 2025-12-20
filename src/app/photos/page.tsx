@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import ProductSearcher from '@/components/ProductSearcher';
 import PhotoCapture from '@/components/PhotoCapture';
 import PhotoGrid from '@/components/PhotoGrid';
@@ -13,7 +12,6 @@ import {
 } from '@/lib/imageUtils';
 
 export default function PhotosPage() {
-  const router = useRouter();
   const [selectedProduct, setSelectedProduct] = useState<DraftProduct | null>(null);
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -238,12 +236,6 @@ export default function PhotosPage() {
     }
   };
 
-  // Handle logout
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/photos/login');
-  };
-
   const hasPhotos = photos.length > 0;
   const allPhotosUploaded = photos.every((p) => p.uploadStatus === 'success');
   const hasErrors = photos.some((p) => p.uploadStatus === 'error');
@@ -252,16 +244,10 @@ export default function PhotosPage() {
     <div className="min-h-screen bg-gray-50 py-6 sm:py-12">
       <div className="mx-auto max-w-6xl px-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
+        <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Photo Manager
           </h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg"
-          >
-            Logout
-          </button>
         </div>
 
         {/* Error/Success Messages */}

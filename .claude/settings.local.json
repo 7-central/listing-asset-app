@@ -10,7 +10,13 @@
       "WebSearch",
       "WebFetch(domain:community.openai.com)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git fetch:*)",
+      "Bash(vercel --version:*)",
+      "Bash(node test-facebook-post.js:*)",
+      "Bash(git push:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

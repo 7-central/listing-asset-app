@@ -166,3 +166,66 @@ export type ScheduledSocialPost = {
   facebookPostId?: string; // Facebook post ID after posting
   facebookPostUrl?: string; // Facebook post URL
 };
+
+// Photos Feature Types
+
+export type PhotoUploadSession = {
+  productId: number;
+  productName: string;
+  photos: PhotoItem[];
+};
+
+export type PhotoItem = {
+  id: string; // Client-side ID (uuidv4)
+  file: File;
+  thumbnail: string; // Base64 or blob URL for preview
+  caption?: string;
+  orderIndex: number;
+  uploadStatus: 'pending' | 'uploading' | 'success' | 'error';
+  uploadProgress?: number;
+  blobUrl?: string; // Vercel Blob URL (backup)
+  wooMediaId?: number; // WooCommerce media library ID
+  wooImageUrl?: string; // WooCommerce image URL
+  error?: string;
+  isFeatured?: boolean;
+};
+
+export type UploadPhotoRequest = {
+  file: File;
+  caption?: string;
+};
+
+export type UploadPhotoResponse = {
+  ok: boolean;
+  blobUrl: string;
+  wooMediaId: number;
+  wooImageUrl: string;
+  filename: string;
+};
+
+export type AttachPhotosRequest = {
+  productId: number;
+  imageIds: number[];
+  featuredImageId?: number;
+};
+
+export type AttachPhotosResponse = {
+  ok: boolean;
+  message: string;
+  productId: number;
+  imageCount: number;
+};
+
+export type WooProductImage = {
+  id: number;
+  src: string;
+  name: string;
+  alt: string;
+};
+
+export type DraftProduct = {
+  id: number;
+  name: string;
+  status: string;
+  permalink: string;
+};

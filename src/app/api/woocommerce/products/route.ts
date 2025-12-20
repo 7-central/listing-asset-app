@@ -1,11 +1,18 @@
-import { NextResponse } from 'next/server';
-import { fetchAllProducts } from '@/lib/woocommerce';
+import { NextRequest, NextResponse } from 'next/server';
+import { fetchAllProducts, fetchDraftProducts } from '@/lib/woocommerce';
 import { WooProductListItem } from '@/lib/types';
 
-// GET /api/woocommerce/products - Fetch all products for dropdown
-export async function GET() {
+// GET /api/woocommerce/products - Fetch products (published or draft)
+// Query params: ?status=draft (optional, defaults to published)
+export async function GET(request: NextRequest) {
   try {
-    const products = await fetchAllProducts();
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+
+    // Fetch products based on status
+    const products = status === 'draft'
+      ? await fetchDraftProducts()
+      : await fetchAllProducts();
 
     // Map to simpler format for dropdown
     const productList: WooProductListItem[] = products.map((product) => ({

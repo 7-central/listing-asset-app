@@ -345,3 +345,125 @@ export async function fetchProductById(productId: number): Promise<any> {
   const product = await wooApiCall<any>(`/wp-json/wc/v3/products/${productId}`);
   return product;
 }
+
+// Fetch all DRAFT products (for photo assignment)
+export async function fetchDraftProducts(): Promise<any[]> {
+  const allProducts: any[] = [];
+  let page = 1;
+  const perPage = 100;
+
+  while (true) {
+    const products = await wooApiCall<any[]>(
+      `/wp-json/wc/v3/products?per_page=${perPage}&page=${page}&status=draft`
+    );
+
+    if (products.length === 0) break;
+
+    allProducts.push(...products);
+
+    if (products.length < perPage) break;
+    page++;
+  }
+
+  console.log(`[WooCommerce] Fetched ${allProducts.length} draft products`);
+  return allProducts;
+}
+
+// Upload image to WordPress media library
+export async function uploadMediaToWooCommerce(
+  fileBuffer: Buffer,
+  filename: string,
+  altText?: string
+): Promise<{ id: number; src: string; name: string; alt: string }> {
+  validateWooConfig();
+
+  console.log(`[WooCommerce] Uploading media: ${filename}`);
+
+  // WordPress media upload endpoint uses multipart/form-data
+  const formData = new FormData();
+  // Convert Buffer to Blob properly for FormData
+  const blob = new Blob([new Uint8Array(fileBuffer)], { type: 'image/jpeg' });
+  formData.append('file', blob, filename);
+
+  if (altText) {
+    formData.append('alt_text', altText);
+  }
+
+  const url = `${WOO_BASE_URL}/wp-json/wp/v2/media`;
+  const headers = {
+    Authorization: createAuthHeader(),
+    // Note: Don't set Content-Type header - let browser set it with boundary
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error(`[WooCommerce] Media upload error: ${errorBody}`);
+    throw {
+      status: response.status,
+      message: `Failed to upload media: ${errorBody}`,
+    };
+  }
+
+  const media = await response.json();
+
+  console.log(`[WooCommerce] Media uploaded successfully: ID ${media.id}`);
+
+  return {
+    id: media.id,
+    src: media.source_url || media.guid?.rendered || '',
+    name: media.title?.rendered || filename,
+    alt: media.alt_text || altText || '',
+  };
+}
+
+// Attach images to a WooCommerce product
+export async function attachImagesToProduct(
+  productId: number,
+  imageIds: number[],
+  featuredImageId?: number
+): Promise<void> {
+  console.log(
+    `[WooCommerce] Attaching ${imageIds.length} images to product ${productId}`
+  );
+
+  // Prepare payload
+  const payload: any = {
+    images: imageIds.map((id) => ({ id })),
+  };
+
+  // Set featured image if specified
+  if (featuredImageId) {
+    payload.featured_media = featuredImageId;
+  }
+
+  await wooApiCall(`/wp-json/wc/v3/products/${productId}`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+  console.log(`[WooCommerce] Images attached successfully`);
+}
+
+// Get current images for a product
+export async function getProductImages(
+  productId: number
+): Promise<{ id: number; src: string; name: string; alt: string }[]> {
+  console.log(`[WooCommerce] Fetching images for product ${productId}`);
+
+  const product = await fetchProductById(productId);
+
+  const images = product.images || [];
+
+  return images.map((img: any) => ({
+    id: img.id,
+    src: img.src,
+    name: img.name || '',
+    alt: img.alt || '',
+  }));
+}

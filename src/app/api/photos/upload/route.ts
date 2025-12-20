@@ -1,11 +1,11 @@
 /**
  * POST /api/photos/upload
- * Uploads photo to Vercel Blob and WooCommerce media library
+ * Uploads photo to Vercel Blob storage
+ * WooCommerce will download the image from Blob URL when attaching to product
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadToBlob } from '@/lib/blob';
-import { uploadMediaToWooCommerce } from '@/lib/woocommerce';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,33 +27,15 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Upload to Vercel Blob (for backup/reference)
+    // Upload to Vercel Blob
     console.log('[Photos Upload] Uploading to Vercel Blob...');
-    let blobUrl = '';
-    try {
-      const blobResult = await uploadToBlob(buffer, file.name);
-      blobUrl = blobResult.url;
-      console.log(`[Photos Upload] Blob upload successful: ${blobUrl}`);
-    } catch (blobError: unknown) {
-      console.error('[Photos Upload] Blob upload failed:', blobError);
-      // Continue anyway - Blob is just backup, WooCommerce is primary
-    }
-
-    // Upload to WooCommerce media library (primary storage)
-    console.log('[Photos Upload] Uploading to WooCommerce...');
-    const wooMedia = await uploadMediaToWooCommerce(
-      buffer,
-      file.name,
-      caption || undefined
-    );
-
-    console.log(`[Photos Upload] WooCommerce upload successful: ${wooMedia.src}`);
+    const blobResult = await uploadToBlob(buffer, file.name);
+    console.log(`[Photos Upload] Blob upload successful: ${blobResult.url}`);
 
     return NextResponse.json({
       ok: true,
-      blobUrl: blobUrl,
-      wooMediaId: wooMedia.id,
-      wooImageUrl: wooMedia.src,
+      imageUrl: blobResult.url,
+      caption: caption || '',
       filename: file.name,
     });
   } catch (error: unknown) {

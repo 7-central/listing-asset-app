@@ -1,15 +1,16 @@
 /**
  * POST /api/photos/attach
- * Attaches uploaded photos to a WooCommerce product
+ * Attaches photos to a WooCommerce product using image URLs
+ * WooCommerce will download and import the images automatically
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { attachImagesToProduct } from '@/lib/woocommerce';
+import { attachImagesByUrlToProduct } from '@/lib/woocommerce';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { productId, imageIds, featuredImageId } = body;
+    const { productId, images } = body;
 
     // Validate required fields
     if (!productId || typeof productId !== 'number') {
@@ -19,28 +20,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!imageIds || !Array.isArray(imageIds) || imageIds.length === 0) {
+    if (!images || !Array.isArray(images) || images.length === 0) {
       return NextResponse.json(
-        { ok: false, error: 'imageIds is required and must be a non-empty array' },
+        { ok: false, error: 'images is required and must be a non-empty array' },
         { status: 400 }
       );
     }
 
-    // Validate all imageIds are numbers
-    const allNumbers = imageIds.every((id) => typeof id === 'number');
-    if (!allNumbers) {
+    // Validate all images have src property
+    const allValid = images.every((img) => img.src && typeof img.src === 'string');
+    if (!allValid) {
       return NextResponse.json(
-        { ok: false, error: 'All imageIds must be numbers' },
+        { ok: false, error: 'All images must have a src property' },
         { status: 400 }
       );
     }
 
     console.log(
-      `[Photos Attach] Attaching ${imageIds.length} images to product ${productId}`
+      `[Photos Attach] Attaching ${images.length} images to product ${productId}`
     );
 
-    // Attach images to WooCommerce product
-    await attachImagesToProduct(productId, imageIds, featuredImageId);
+    // Attach images to WooCommerce product by URL
+    await attachImagesByUrlToProduct(productId, images);
 
     console.log(`[Photos Attach] Successfully attached images to product ${productId}`);
 
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       ok: true,
       message: 'Images attached successfully',
       productId,
-      imageCount: imageIds.length,
+      imageCount: images.length,
     });
   } catch (error: unknown) {
     console.error('[Photos Attach] Error:', error);

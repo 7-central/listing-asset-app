@@ -128,8 +128,7 @@ export default function PhotosPage() {
     setError('');
     setSuccess('');
 
-    const uploadedMediaIds: number[] = [];
-    let featuredMediaId: number | undefined;
+    const uploadedImages: Array<{ src: string; alt?: string }> = [];
 
     try {
       // Upload each photo
@@ -164,20 +163,17 @@ export default function PhotosPage() {
                   ? {
                       ...p,
                       uploadStatus: 'success',
-                      blobUrl: data.blobUrl,
-                      wooMediaId: data.wooMediaId,
-                      wooImageUrl: data.wooImageUrl,
+                      blobUrl: data.imageUrl,
                     }
                   : p
               )
             );
 
-            uploadedMediaIds.push(data.wooMediaId);
-
-            // Track featured image
-            if (photo.isFeatured) {
-              featuredMediaId = data.wooMediaId;
-            }
+            // Add to uploaded images array
+            uploadedImages.push({
+              src: data.imageUrl,
+              alt: photo.caption || '',
+            });
           } else {
             throw new Error(data.error || 'Upload failed');
           }
@@ -197,19 +193,13 @@ export default function PhotosPage() {
         }
       }
 
-      // If no featured image selected, use first image
-      if (!featuredMediaId && uploadedMediaIds.length > 0) {
-        featuredMediaId = uploadedMediaIds[0];
-      }
-
       // Attach all images to product
       const attachResponse = await fetch('/api/photos/attach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: selectedProduct.id,
-          imageIds: uploadedMediaIds,
-          featuredImageId: featuredMediaId,
+          images: uploadedImages,
         }),
       });
 
@@ -217,7 +207,7 @@ export default function PhotosPage() {
 
       if (attachData.ok) {
         setSuccess(
-          `Successfully uploaded ${uploadedMediaIds.length} photo(s) to "${selectedProduct.name}"!`
+          `Successfully uploaded ${uploadedImages.length} photo(s) to "${selectedProduct.name}"!`
         );
 
         // Clear photos after successful upload

@@ -450,6 +450,33 @@ export async function attachImagesToProduct(
   console.log(`[WooCommerce] Images attached successfully`);
 }
 
+// Attach images to a WooCommerce product using image URLs
+// WooCommerce will download and import the images automatically
+export async function attachImagesByUrlToProduct(
+  productId: number,
+  images: Array<{ src: string; alt?: string }>
+): Promise<void> {
+  console.log(
+    `[WooCommerce] Attaching ${images.length} images by URL to product ${productId}`
+  );
+
+  // Prepare payload with image URLs
+  // WooCommerce will download the images from these URLs
+  const payload: any = {
+    images: images.map((img) => ({
+      src: img.src,
+      alt: img.alt || '',
+    })),
+  };
+
+  await wooApiCall(`/wp-json/wc/v3/products/${productId}`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+  console.log(`[WooCommerce] Images attached successfully by URL`);
+}
+
 // Get current images for a product
 export async function getProductImages(
   productId: number

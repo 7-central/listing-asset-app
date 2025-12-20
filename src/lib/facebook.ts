@@ -25,12 +25,12 @@ export type FacebookErrorResponse = {
 };
 
 /**
- * Posts a message (with optional image and link) to a Facebook Business Page
+ * Posts a message (with optional link) to a Facebook Business Page
  * Uses Graph API v24.0
  *
  * @param message - The text content of the post
- * @param productUrl - Optional URL that the post should link to (e.g., product page)
- * @param imageUrl - Optional URL of image to display with the post
+ * @param productUrl - Optional URL that the post should link to (e.g., product page). Facebook will automatically scrape og:image from this URL.
+ * @param imageUrl - Optional URL of image (only used if no productUrl provided)
  * @param scheduledPublishTime - Optional Unix timestamp for scheduled posts
  * @returns Facebook post ID and URL
  */
@@ -66,13 +66,11 @@ export async function postToFacebookPage(
   formData.append('message', message);
 
   // Add product URL as the primary link (this is what opens when clicking the post)
+  // Facebook will automatically scrape Open Graph metadata (image, title, description) from the URL
   if (productUrl) {
     formData.append('link', productUrl);
-
-    // Add image as picture parameter to show with the link preview
-    if (imageUrl) {
-      formData.append('picture', imageUrl);
-    }
+    // Note: We cannot specify 'picture' parameter when linking to external URLs
+    // Facebook automatically uses og:image from the product page
   } else if (imageUrl) {
     // Fallback: if no product URL, just link to the image
     formData.append('link', imageUrl);

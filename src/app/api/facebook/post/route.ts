@@ -8,13 +8,14 @@ import { postToFacebookPage } from '@/lib/facebook';
  * Request body:
  * {
  *   message: string;            // Post text
+ *   productUrl?: string;        // Product URL to link to
  *   imageUrl?: string;          // Optional image URL
  * }
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, imageUrl } = body;
+    const { message, productUrl, imageUrl } = body;
 
     // Validate required fields
     if (!message || message.trim().length === 0) {
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // Post to Facebook immediately (no scheduling)
-      const result = await postToFacebookPage(message, imageUrl);
+      const result = await postToFacebookPage(message, productUrl, imageUrl);
 
       console.log(`[API] Successfully posted to Facebook: ${result.postUrl}`);
 

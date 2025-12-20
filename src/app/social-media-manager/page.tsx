@@ -136,6 +136,7 @@ export default function SocialMediaManager() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: post.text,
+          productUrl: selectedProduct.permalink, // Link to the WooCommerce product page
           imageUrl: post.imageUrl,
         }),
       });

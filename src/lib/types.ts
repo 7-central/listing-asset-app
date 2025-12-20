@@ -130,6 +130,7 @@ export type SocialMediaPost = {
   text: string;
   imageUrl: string;
   imageAlt: string;
+  productUrl?: string; // Link to the product page on WooCommerce
   platform: 'facebook' | 'instagram' | 'both';
   scheduledDateTime?: string; // ISO 8601 format
   characterCount: number;
@@ -156,6 +157,7 @@ export type ScheduledSocialPost = {
   imageUrl: string;
   productId: number;
   productName: string;
+  productUrl?: string; // Link to the product page on WooCommerce
   scheduledDateTime: string; // ISO 8601
   status: 'scheduled' | 'posted' | 'failed';
   platform: 'facebook' | 'instagram' | 'both';

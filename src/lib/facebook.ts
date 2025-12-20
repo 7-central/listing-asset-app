@@ -5,7 +5,8 @@
 
 export type FacebookPostRequest = {
   message: string;
-  imageUrl?: string;
+  productUrl?: string; // The URL to link to (opens when clicking the post)
+  imageUrl?: string; // Optional image to display with the post
   scheduledPublishTime?: number; // Unix timestamp (optional, for scheduled posts)
 };
 
@@ -24,16 +25,18 @@ export type FacebookErrorResponse = {
 };
 
 /**
- * Posts a message (with optional image) to a Facebook Business Page
+ * Posts a message (with optional image and link) to a Facebook Business Page
  * Uses Graph API v24.0
  *
  * @param message - The text content of the post
- * @param imageUrl - Optional URL of image to include in post
+ * @param productUrl - Optional URL that the post should link to (e.g., product page)
+ * @param imageUrl - Optional URL of image to display with the post
  * @param scheduledPublishTime - Optional Unix timestamp for scheduled posts
  * @returns Facebook post ID and URL
  */
 export async function postToFacebookPage(
   message: string,
+  productUrl?: string,
   imageUrl?: string,
   scheduledPublishTime?: number
 ): Promise<FacebookPostResponse> {
@@ -62,8 +65,16 @@ export async function postToFacebookPage(
 
   formData.append('message', message);
 
-  // If there's an image, add it as a link attachment
-  if (imageUrl) {
+  // Add product URL as the primary link (this is what opens when clicking the post)
+  if (productUrl) {
+    formData.append('link', productUrl);
+
+    // Add image as picture parameter to show with the link preview
+    if (imageUrl) {
+      formData.append('picture', imageUrl);
+    }
+  } else if (imageUrl) {
+    // Fallback: if no product URL, just link to the image
     formData.append('link', imageUrl);
   }
 

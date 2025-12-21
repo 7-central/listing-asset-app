@@ -66,11 +66,13 @@ export async function postToFacebookPage(
   formData.append('message', message);
 
   // Add product URL as the primary link (this is what opens when clicking the post)
-  // Facebook will automatically scrape Open Graph metadata (image, title, description) from the URL
   if (productUrl) {
     formData.append('link', productUrl);
-    // Note: We cannot specify 'picture' parameter when linking to external URLs
-    // Facebook automatically uses og:image from the product page
+    // If we also have an imageUrl, try to use it as the picture
+    // This shows the custom image but links to the productUrl
+    if (imageUrl) {
+      formData.append('picture', imageUrl);
+    }
   } else if (imageUrl) {
     // Fallback: if no product URL, just link to the image
     formData.append('link', imageUrl);

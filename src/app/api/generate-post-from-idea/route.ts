@@ -32,19 +32,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`[API] Generating social post from idea: "${idea.substring(0, 50)}..."`);
 
-    const prompt = `You are a social media marketing expert for a handmade crafts business. The user has provided a short idea for a Facebook post. Your task is to expand this into a compelling, engaging Facebook post.
-
-User's idea: "${idea}"
-
-Create an engaging Facebook post based on this idea. The post should:
-- Be warm, friendly, and conversational
-- Be between 100-200 words
-- Include relevant emojis where appropriate (but not too many)
-- End with a call-to-action or engaging question
-- Be formatted for Facebook (use line breaks for readability)
-
-Return ONLY the post text, no JSON, no explanations, just the ready-to-post text.`;
-
+    // Use the user's text directly as the prompt
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -58,7 +46,7 @@ Return ONLY the post text, no JSON, no explanations, just the ready-to-post text
         messages: [
           {
             role: 'user',
-            content: prompt,
+            content: idea,
           },
         ],
       }),

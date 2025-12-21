@@ -32,11 +32,38 @@ export async function uploadToBlob(
     // Generate unique filename with timestamp to avoid collisions
     const timestamp = Date.now();
     const originalName = file instanceof File ? file.name : filename || 'image.jpg';
-    const extension = originalName.split('.').pop() || 'jpg';
-    const baseName = originalName.replace(/\.[^/.]+$/, '');
+
+    // Determine proper file extension from MIME type or filename
+    let extension = 'jpg'; // default
+
+    if (file instanceof File && file.type) {
+      // Use MIME type to determine extension (more reliable)
+      const mimeType = file.type.toLowerCase();
+      if (mimeType.includes('png')) extension = 'png';
+      else if (mimeType.includes('jpeg') || mimeType.includes('jpg')) extension = 'jpg';
+      else if (mimeType.includes('webp')) extension = 'webp';
+      else if (mimeType.includes('gif')) extension = 'gif';
+    } else {
+      // Fallback to filename extension
+      const fileExt = originalName.split('.').pop()?.toLowerCase() || 'jpg';
+      // Only use it if it's a valid image extension
+      if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(fileExt)) {
+        extension = fileExt;
+      }
+    }
+
+    // Create clean base name (remove extension and special chars)
+    const baseName = originalName
+      .replace(/\.[^/.]+$/, '') // remove extension
+      .replace(/[^a-zA-Z0-9-_]/g, '-') // replace special chars with dash
+      .replace(/-+/g, '-') // collapse multiple dashes
+      .replace(/^-|-$/g, '') // trim dashes from ends
+      .substring(0, 50) || 'image'; // limit length, default to 'image'
+
     const uniqueFilename = `${baseName}-${timestamp}.${extension}`;
 
     console.log('[Blob] Uploading file:', uniqueFilename);
+    console.log('[Blob] MIME type:', file instanceof File ? file.type : 'Buffer');
 
     // Upload to Vercel Blob
     const blob = await put(uniqueFilename, file, {

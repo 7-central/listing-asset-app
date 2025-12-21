@@ -59,23 +59,26 @@ export async function postToFacebookPage(
   const apiVersion = 'v24.0';
   const formData = new URLSearchParams();
 
-  // Use /feed endpoint for both text and images
-  // This has fewer restrictions than /photos endpoint
-  const endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/feed?access_token=${encodeURIComponent(pageAccessToken)}`;
+  // Determine which endpoint to use based on whether we have an image
+  let endpoint: string;
 
-  formData.append('message', message);
-
-  // Add product URL as the primary link (this is what opens when clicking the post)
-  if (productUrl) {
+  if (imageUrl) {
+    // Use /photos endpoint for posts with images
+    // This provides better image quality than /feed endpoint
+    endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/photos?access_token=${encodeURIComponent(pageAccessToken)}`;
+    formData.append('url', imageUrl); // The image URL to display
+    formData.append('caption', message); // The post text
+    // Note: Custom external links should be included in the message text
+    // Facebook will automatically make URLs in the text clickable
+  } else if (productUrl) {
+    // Link post without image
+    endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/feed?access_token=${encodeURIComponent(pageAccessToken)}`;
+    formData.append('message', message);
     formData.append('link', productUrl);
-    // If we also have an imageUrl, try to use it as the picture
-    // This shows the custom image but links to the productUrl
-    if (imageUrl) {
-      formData.append('picture', imageUrl);
-    }
-  } else if (imageUrl) {
-    // Fallback: if no product URL, just link to the image
-    formData.append('link', imageUrl);
+  } else {
+    // Text-only post
+    endpoint = `https://graph.facebook.com/${apiVersion}/${pageId}/feed?access_token=${encodeURIComponent(pageAccessToken)}`;
+    formData.append('message', message);
   }
 
   // Add scheduled publish time if provided

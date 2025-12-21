@@ -27,6 +27,7 @@ export default function SocialMediaManager() {
   const [customPost, setCustomPost] = useState<string>('');
   const [generatingCustomPost, setGeneratingCustomPost] = useState(false);
   const [postingCustomPost, setPostingCustomPost] = useState(false);
+  const [postingToInstagram, setPostingToInstagram] = useState(false);
   const [customError, setCustomError] = useState<string | null>(null);
   const [customSuccess, setCustomSuccess] = useState<string | null>(null);
 
@@ -285,6 +286,69 @@ export default function SocialMediaManager() {
     }
   };
 
+  const handlePostCustomToInstagram = async () => {
+    if (!customPost.trim()) {
+      setCustomError('Please generate a post first');
+      return;
+    }
+
+    if (!customImage) {
+      setCustomError('Please select an image');
+      return;
+    }
+
+    setPostingToInstagram(true);
+    setCustomError(null);
+    setCustomSuccess(null);
+
+    try {
+      // Upload image to Vercel Blob first
+      const formData = new FormData();
+      formData.append('file', customImage);
+
+      const uploadResponse = await fetch('/api/photos/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const uploadData = await uploadResponse.json();
+
+      if (!uploadData.ok) {
+        throw new Error(uploadData.error || 'Failed to upload image');
+      }
+
+      // Post to Instagram with uploaded image URL
+      const igResponse = await fetch('/api/instagram/post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          caption: customPost,
+          imageUrl: uploadData.imageUrl,
+        }),
+      });
+
+      const igData = await igResponse.json();
+
+      if (igData.ok) {
+        setCustomSuccess(`Successfully posted to Instagram! View on your Instagram profile.`);
+        // Clear form after successful post
+        setTimeout(() => {
+          setCustomImage(null);
+          setCustomImagePreview(null);
+          setCustomIdea('');
+          setCustomPost('');
+          setCustomSuccess(null);
+        }, 5000);
+      } else {
+        setCustomError(`Failed to post to Instagram: ${igData.error}`);
+      }
+    } catch (err: any) {
+      setCustomError(err.message || 'Error posting to Instagram');
+    } finally {
+      setPostingToInstagram(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-6 sm:py-12">
       <div className="mx-auto max-w-6xl px-4">
@@ -401,13 +465,23 @@ export default function SocialMediaManager() {
                     {customPost.length} characters
                   </p>
 
-                  <button
-                    onClick={handlePostCustomToFacebook}
-                    disabled={!customImage || postingCustomPost}
-                    className="w-full bg-green-600 text-white py-3 px-4 rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold mt-3"
-                  >
-                    {postingCustomPost ? 'Posting to Facebook...' : 'Post To Facebook Now'}
-                  </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                    <button
+                      onClick={handlePostCustomToFacebook}
+                      disabled={!customImage || postingCustomPost || postingToInstagram}
+                      className="w-full bg-blue-600 text-white py-3 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold"
+                    >
+                      {postingCustomPost ? 'Posting...' : 'Post To Facebook Now'}
+                    </button>
+
+                    <button
+                      onClick={handlePostCustomToInstagram}
+                      disabled={!customImage || postingCustomPost || postingToInstagram}
+                      className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded hover:from-purple-700 hover:to-pink-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold"
+                    >
+                      {postingToInstagram ? 'Posting...' : 'Post To Instagram Now'}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

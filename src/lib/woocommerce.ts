@@ -452,22 +452,32 @@ export async function attachImagesToProduct(
 
 // Attach images to a WooCommerce product using image URLs
 // WooCommerce will download and import the images automatically
+// This function APPENDS new images to existing gallery instead of replacing
 export async function attachImagesByUrlToProduct(
   productId: number,
   images: Array<{ src: string; alt?: string }>
 ): Promise<void> {
   console.log(
-    `[WooCommerce] Attaching ${images.length} images by URL to product ${productId}`
+    `[WooCommerce] Attaching ${images.length} new images by URL to product ${productId}`
   );
-  console.log('[WooCommerce] Image URLs:', images.map(img => img.src));
+  console.log('[WooCommerce] New image URLs:', images.map(img => img.src));
 
-  // Prepare payload with image URLs
-  // WooCommerce will download the images from these URLs
+  // First, get existing images from the product
+  const existingImages = await getProductImages(productId);
+  console.log(`[WooCommerce] Product currently has ${existingImages.length} existing images`);
+
+  // Combine existing images with new ones
+  // Existing images come first to preserve order, new images append to the end
+  const allImages = [
+    ...existingImages.map(img => ({ src: img.src, alt: img.alt })),
+    ...images.map((img) => ({ src: img.src, alt: img.alt || '' })),
+  ];
+
+  console.log(`[WooCommerce] Total images after append: ${allImages.length}`);
+
+  // Prepare payload with all images (existing + new)
   const payload: any = {
-    images: images.map((img) => ({
-      src: img.src,
-      alt: img.alt || '',
-    })),
+    images: allImages,
   };
 
   console.log('[WooCommerce] Payload:', JSON.stringify(payload, null, 2));
@@ -483,6 +493,8 @@ export async function attachImagesByUrlToProduct(
   if (!result.images || result.images.length === 0) {
     console.error('[WooCommerce] WARNING: Product updated but no images in response!');
     console.error('[WooCommerce] This may indicate WooCommerce could not download the images from the URLs');
+  } else {
+    console.log(`[WooCommerce] Successfully attached images. Gallery now has ${result.images.length} total images`);
   }
 }
 

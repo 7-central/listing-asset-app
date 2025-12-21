@@ -58,11 +58,11 @@ export async function compressImage(
   }
 ): Promise<File> {
   const defaultOptions = {
-    maxSizeMB: 1, // Target file size
-    maxWidthOrHeight: 2000, // Max dimension (long edge)
+    maxSizeMB: 5, // Target file size (increased for better quality)
+    maxWidthOrHeight: 3000, // Max dimension (increased for sharper images)
     useWebWorker: true, // Use web worker for better performance
     fileType: 'image/jpeg' as const, // Convert to JPEG
-    initialQuality: 0.85, // JPEG quality
+    initialQuality: 0.95, // JPEG quality (increased from 0.85 to 0.95 for much better quality)
   };
 
   const compressionOptions = {

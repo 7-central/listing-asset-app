@@ -254,12 +254,13 @@ export default function SocialMediaManager() {
         throw new Error(uploadData.error || 'Failed to upload image');
       }
 
-      // Post to Facebook with uploaded image URL
+      // Post to Facebook with uploaded image URL and website link
       const fbResponse = await fetch('/api/facebook/post', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: customPost,
+          productUrl: 'https://www.lakewayworkshop.co.uk',
           imageUrl: uploadData.imageUrl,
         }),
       });

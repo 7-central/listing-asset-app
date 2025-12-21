@@ -459,6 +459,7 @@ export async function attachImagesByUrlToProduct(
   console.log(
     `[WooCommerce] Attaching ${images.length} images by URL to product ${productId}`
   );
+  console.log('[WooCommerce] Image URLs:', images.map(img => img.src));
 
   // Prepare payload with image URLs
   // WooCommerce will download the images from these URLs
@@ -469,12 +470,20 @@ export async function attachImagesByUrlToProduct(
     })),
   };
 
-  await wooApiCall(`/wp-json/wc/v3/products/${productId}`, {
-    method: 'POST',
+  console.log('[WooCommerce] Payload:', JSON.stringify(payload, null, 2));
+
+  const result = await wooApiCall<any>(`/wp-json/wc/v3/products/${productId}`, {
+    method: 'PUT',
     body: JSON.stringify(payload),
   });
 
-  console.log(`[WooCommerce] Images attached successfully by URL`);
+  console.log(`[WooCommerce] Response:`, JSON.stringify(result, null, 2));
+  console.log(`[WooCommerce] Images in response:`, result.images?.length || 0);
+
+  if (!result.images || result.images.length === 0) {
+    console.error('[WooCommerce] WARNING: Product updated but no images in response!');
+    console.error('[WooCommerce] This may indicate WooCommerce could not download the images from the URLs');
+  }
 }
 
 // Get current images for a product
